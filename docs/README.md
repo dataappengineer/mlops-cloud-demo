@@ -11,6 +11,8 @@ This folder contains guides and templates for setting up, securing, and managing
 - `security_checklist.md`: Quick checklist for AWS security hygiene (MFA, key rotation, least privilege, etc.)
 - `billing_and_cost_management.md`: How to set up budgets, Free Tier usage alerts, and monitor costs
 - `resource_cleanup.md`: How to identify and clean up unused AWS resources to minimize costs
+- `cloudwatch_vs_billing_alerts.md`: When to use CloudWatch alarms vs. billing/Free Tier alerts
+- `README.md`: Overview and navigation for aws-setup docs
 
 ## Subfolders by Project Phase
 - `aws-setup/`: All AWS account, IAM, billing, and cost management docs
@@ -30,4 +32,4 @@ This folder contains guides and templates for setting up, securing, and managing
 
 ---
 
-_Last updated: June 21, 2025_
+_Last updated: June 22, 2025_
