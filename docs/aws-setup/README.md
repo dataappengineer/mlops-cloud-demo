@@ -11,6 +11,7 @@ This folder contains all guides and templates for securely setting up, managing,
 - `security_checklist.md`: Quick checklist for AWS security hygiene (MFA, key rotation, least privilege, etc.)
 - `billing_and_cost_management.md`: How to set up budgets, Free Tier usage alerts, and monitor costs
 - `resource_cleanup.md`: How to identify and clean up unused AWS resources to minimize costs
+- `cloudwatch_vs_billing_alerts.md`: When to use CloudWatch alarms vs. Free Tier/Billing alerts, and how to set them up
 
 ## How to Use This Folder
 1. **Start with `aws_account_setup.md`** to create your AWS account, secure the root user, and set up IAM users and groups.
@@ -21,6 +22,7 @@ This folder contains all guides and templates for securely setting up, managing,
 6. **Regularly check `security_checklist.md`** to maintain strong security practices.
 7. **Monitor your spending with `billing_and_cost_management.md`** and set up all recommended alerts.
 8. **Periodically review `resource_cleanup.md`** to ensure you’re not paying for unused resources.
+9. **Read `cloudwatch_vs_billing_alerts.md`** to understand the difference between CloudWatch alarms and AWS billing alerts, and decide if you need more granular monitoring.
 
 Keep this folder updated as your project evolves, and use it as a reference for onboarding new team members or writing technical articles about your cloud setup.
 
