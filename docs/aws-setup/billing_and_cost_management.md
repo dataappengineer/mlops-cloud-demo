@@ -14,7 +14,7 @@ This document tracks all steps and settings related to AWS billing, cost managem
 2. **Enabled Free Tier Usage Alerts** (must be activated separately from your zero-spend budget)
    - Notifies you when you're approaching or exceeding Free Tier limits for specific services.
    - To activate: 
-     - Open the AWS Billing and Cost Management console
+     - Sign in to the AWS Management Console and open the Billing console at https://console.aws.amazon.com/billing/.
      - In the navigation pane, choose "Billing preferences"
      - In the "Alert preferences" section, choose "Edit"
      - Select "Receive AWS Free Tier usage alerts"
