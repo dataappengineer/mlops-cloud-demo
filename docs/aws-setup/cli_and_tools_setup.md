@@ -30,3 +30,26 @@
       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws-region: us-east-1
   ```
+
+# Verifying Your AWS CLI Profile and Access
+
+After configuring your AWS CLI profile, you can verify that it is set up correctly and has access to your AWS account by running the following command in your terminal:
+
+```powershell
+aws sts get-caller-identity
+```
+
+A successful response will look like this (with generic values):
+
+```
+{
+    "UserId": "AIDAEXAMPLEUSERID",
+    "Account": "123456789012",
+    "Arn": "arn:aws:iam::123456789012:user/user-with-least-privileges"
+}
+```
+
+- If you see your user and account information, your profile is set up and working.
+- If you get an error, check your credentials and permissions.
+
+You can also use this command to confirm which profile is active and which user is being used for AWS CLI operations.
