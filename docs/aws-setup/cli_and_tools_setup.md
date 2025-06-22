@@ -11,14 +11,27 @@
 
 ## Setting Up Terraform for AWS
 - Install Terraform: https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
-- Use the AWS CLI profile or set environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`).
-- Example provider block in Terraform:
+- Add Terraform to your system PATH if needed (Windows users may need to restart VS Code after installation).
+- Configure your AWS CLI profile (e.g., `mlops-dev-user`) using `aws configure --profile mlops-dev-user`.
+- You can use the AWS CLI profile in Terraform, or set environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`) if you prefer.
+- To use your profile, set it in your provider block (replace `default` with your profile name):
   ```hcl
   provider "aws" {
-    region = "us-east-1"
-    profile = "default"
+    region  = "us-east-1"
+    profile = "mlops-dev-user"
   }
   ```
+- In VS Code, open a terminal in your project directory and run:
+  ```powershell
+  terraform init
+  terraform plan
+  terraform apply
+  ```
+- If you want Terraform to always use your profile in the terminal session, set it with:
+  ```powershell
+  $env:AWS_PROFILE = "mlops-dev-user"
+  ```
+- Never commit `.terraform/`, `*.tfstate`, or sensitive files to git. Add them to `.gitignore`.
 
 ## Setting Up GitHub Actions for AWS
 - Store your IAM user's access keys as GitHub repository secrets (e.g., `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`).
