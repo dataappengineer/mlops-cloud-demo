@@ -1,3 +1,24 @@
+"""
+Airflow DAG: data_ingestion_pipeline
+
+This DAG orchestrates a data ingestion pipeline with the following steps:
+- Fetch a CSV file from an external source (public URL or predefined location)
+- (To be added) Clean/process the data
+- (To be added) Upload the processed data to S3
+
+Author: Giovanni Brucoli
+Date: 2025-06-25
+
+Usage:
+- Place this file in the data-pipeline/dags/ directory of your Airflow project.
+- The DAG runs daily and can be triggered manually for testing.
+- The fetch_csv task downloads a CSV and saves it to /tmp/fetched_data.csv by default.
+- Parameters can be customized in the PythonOperator params.
+
+Next steps:
+- Implement data cleaning and S3 upload tasks.
+"""
+
 from airflow import DAG
 from airflow.utils.dates import days_ago
 from datetime import timedelta
