@@ -1,0 +1,4 @@
+{
+  "csv_url": "https://raw.githubusercontent.com/prust/wikipedia-movie-data/master/movies.csv",
+  "output_path": "/tmp/netflix_movies.csv"
+}

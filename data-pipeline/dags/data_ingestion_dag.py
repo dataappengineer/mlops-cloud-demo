@@ -38,7 +38,7 @@ default_args = {
 
 def fetch_csv(**context):
     url = context['params'].get('csv_url', 'https://people.sc.fsu.edu/~jburkardt/data/csv/airtravel.csv')
-    output_path = context['params'].get('output_path', '/tmp/fetched_data.csv')
+    output_path = context['params'].get('output_path', '/opt/airflow/data/fetched_data.csv')
     response = requests.get(url)
     response.raise_for_status()
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -63,7 +63,7 @@ with DAG(
         provide_context=True,
         params={
             'csv_url': 'https://people.sc.fsu.edu/~jburkardt/data/csv/airtravel.csv',
-            'output_path': '/tmp/fetched_data.csv',
+            'output_path': '/opt/airflow/data/fetched_data.csv',
         },
     )
     # Task definitions for cleaning and upload will be added next
