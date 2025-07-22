@@ -3,4 +3,3 @@
     "csv_url": "https://raw.githubusercontent.com/prust/wikipedia-movie-data/master/movies.csv",
     "output_path": "/opt/airflow/data/netflix_movies.csv"
   }
-}
