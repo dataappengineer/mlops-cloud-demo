@@ -56,6 +56,7 @@ with DAG(
     start_date=days_ago(1),
     catchup=False,
     tags=['mlops', 'data-ingestion'],
+    is_paused_upon_creation=False,
 ) as dag:
     fetch_csv_task = PythonOperator(
         task_id='fetch_csv',
