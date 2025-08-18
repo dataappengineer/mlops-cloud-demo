@@ -55,6 +55,16 @@ def fetch_csv(**context):
     context['ti'].xcom_push(key='csv_path', value=output_path)
 
 def clean_csv(**context):
+    """
+    Advanced, portfolio-grade data cleaning function.
+    - Standardizes column names, drops duplicates, trims strings, parses dates.
+    - Handles missing data with imputation (mean, mode, KNN if available) and only drops rows as a last resort.
+    - Analyzes missing data mechanisms:
+        * MCAR: Missing Completely At Random (missingness is unrelated to data)
+        * MAR: Missing At Random (missingness related to observed data)
+        * NMAR: Not Missing At Random (missingness related to unobserved/missing data)
+    - Logs each step for transparency and extensibility.
+    """
     ti = context['ti']
     input_path = ti.xcom_pull(key='csv_path', task_ids='fetch_csv')
     cleaned_path = input_path.replace('.csv', '_cleaned.csv')
