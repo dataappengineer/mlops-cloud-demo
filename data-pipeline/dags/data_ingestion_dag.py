@@ -29,6 +29,7 @@ import os
 import pandas as pd
 import boto3
 from botocore.exceptions import NoCredentialsError
+import janitor  # pyjanitor for advanced cleaning
 
 # Default arguments for the DAG
 default_args = {
@@ -57,12 +58,40 @@ def clean_csv(**context):
     ti = context['ti']
     input_path = ti.xcom_pull(key='csv_path', task_ids='fetch_csv')
     cleaned_path = input_path.replace('.csv', '_cleaned.csv')
-    print(f"Cleaning CSV: {input_path} -> {cleaned_path}")
+    print(f"[clean_csv] Cleaning CSV: {input_path} -> {cleaned_path}")
     df = pd.read_csv(input_path)
-    # Example cleaning: drop rows with any missing values
-    df_cleaned = df.dropna()
-    df_cleaned.to_csv(cleaned_path, index=False)
-    print(f"Cleaned CSV saved to {cleaned_path}")
+
+    # 1. Standardize column names
+    df = df.clean_names()  # pyjanitor: snake_case, lowercase
+    print("[clean_csv] Standardized column names.")
+
+    # 2. Drop duplicates
+    before = len(df)
+    df = df.drop_duplicates()
+    print(f"[clean_csv] Dropped duplicates: {before - len(df)} rows removed.")
+
+    # 3. Handle missing values (drop rows with any NA, or impute as needed)
+    na_before = df.isna().sum().sum()
+    df = df.dropna()
+    print(f"[clean_csv] Dropped rows with missing values: {na_before} NA values removed.")
+
+    # 4. Trim strings and convert types (example: try to parse dates)
+    for col in df.select_dtypes(include='object').columns:
+        df[col] = df[col].astype(str).str.strip()
+    print("[clean_csv] Trimmed whitespace from string columns.")
+
+    # 5. (Optional) Convert date columns if present
+    for col in df.columns:
+        if 'date' in col:
+            try:
+                df[col] = pd.to_datetime(df[col], errors='coerce')
+                print(f"[clean_csv] Converted {col} to datetime.")
+            except Exception:
+                pass
+
+    # 6. Save cleaned file
+    df.to_csv(cleaned_path, index=False)
+    print(f"[clean_csv] Cleaned CSV saved to {cleaned_path}")
     ti.xcom_push(key='cleaned_csv_path', value=cleaned_path)
 
 def upload_to_s3(**context):
