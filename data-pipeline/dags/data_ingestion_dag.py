@@ -1,3 +1,35 @@
+def validate_data(**context):
+    """
+    Data validation task: detects and removes outliers using Z-score and IQR methods.
+    Logs the number of outliers removed for each numeric column.
+    """
+    import numpy as np
+    ti = context['ti']
+    cleaned_path = ti.xcom_pull(key='cleaned_csv_path', task_ids='clean_csv')
+    validated_path = cleaned_path.replace('_cleaned.csv', '_validated.csv')
+    print(f"[validate_data] Validating data: {cleaned_path} -> {validated_path}")
+    df = pd.read_csv(cleaned_path)
+
+    num_cols = df.select_dtypes(include='number').columns
+    for col in num_cols:
+        # Z-score method
+        z_scores = np.abs((df[col] - df[col].mean()) / df[col].std(ddof=0))
+        z_outliers = z_scores > 3
+        # IQR method
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        iqr_outliers = (df[col] < (Q1 - 1.5 * IQR)) | (df[col] > (Q3 + 1.5 * IQR))
+        # Combine both
+        outliers = z_outliers | iqr_outliers
+        n_outliers = outliers.sum()
+        if n_outliers > 0:
+            print(f"[validate_data] {n_outliers} outliers detected in column '{col}' (removed).")
+            df = df[~outliers]
+
+    df.to_csv(validated_path, index=False)
+    print(f"[validate_data] Validated data saved to {validated_path}")
+    ti.xcom_push(key='validated_csv_path', value=validated_path)
 """
 Airflow DAG: data_ingestion_pipeline
 
@@ -188,6 +220,12 @@ with DAG(
         provide_context=True,
     )
 
+    validate_data_task = PythonOperator(
+        task_id='validate_data',
+        python_callable=validate_data,
+        provide_context=True,
+    )
+
     upload_to_s3_task = PythonOperator(
         task_id='upload_to_s3',
         python_callable=upload_to_s3,
@@ -197,4 +235,4 @@ with DAG(
         },
     )
 
-    fetch_csv_task >> clean_csv_task >> upload_to_s3_task
+    fetch_csv_task >> clean_csv_task >> validate_data_task >> upload_to_s3_task
