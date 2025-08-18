@@ -92,13 +92,27 @@ def clean_csv(**context):
         elif any(df.isna().sum() > 0):
             print("[clean_csv] Missingness may depend on observed data (possible MAR or NMAR). Review domain knowledge.")
 
-        # Impute numeric columns with mean
+
         num_cols = df.select_dtypes(include='number').columns
-        for col in num_cols:
-            if df[col].isna().any():
-                mean_val = df[col].mean()
-                df[col] = df[col].fillna(mean_val)
-                print(f"[clean_csv] Imputed numeric column '{col}' with mean: {mean_val}")
+        used_knn = False
+        # Try KNN imputation for numeric columns if sklearn is available
+        try:
+            from sklearn.impute import KNNImputer
+            if df[num_cols].isna().sum().sum() > 0:
+                imputer = KNNImputer(n_neighbors=3)
+                df[num_cols] = imputer.fit_transform(df[num_cols])
+                print("[clean_csv] Applied KNN imputation to numeric columns.")
+                used_knn = True
+        except ImportError:
+            print("[clean_csv] sklearn not available, skipping KNN imputation.")
+
+        # If KNN not used, fallback to mean imputation for numeric columns
+        if not used_knn:
+            for col in num_cols:
+                if df[col].isna().any():
+                    mean_val = df[col].mean()
+                    df[col] = df[col].fillna(mean_val)
+                    print(f"[clean_csv] Imputed numeric column '{col}' with mean: {mean_val}")
 
         # Impute categorical columns with mode
         cat_cols = df.select_dtypes(include='object').columns
@@ -107,15 +121,6 @@ def clean_csv(**context):
                 mode_val = df[col].mode().iloc[0] if not df[col].mode().empty else ''
                 df[col] = df[col].fillna(mode_val)
                 print(f"[clean_csv] Imputed categorical column '{col}' with mode: {mode_val}")
-
-        # Optional: KNN imputation if pyjanitor/sklearn is available (advanced)
-        try:
-            from sklearn.impute import KNNImputer
-            imputer = KNNImputer(n_neighbors=3)
-            df[num_cols] = imputer.fit_transform(df[num_cols])
-            print("[clean_csv] Applied KNN imputation to numeric columns.")
-        except ImportError:
-            print("[clean_csv] sklearn not available, skipping KNN imputation.")
 
         na_after = df.isna().sum().sum()
         print(f"[clean_csv] Total missing values after imputation: {na_after}")
