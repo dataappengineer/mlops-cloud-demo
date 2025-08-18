@@ -7,7 +7,7 @@ This DAG orchestrates a data ingestion pipeline with the following steps:
 - (To be added) Upload the processed data to S3
 
 Author: Giovanni Brucoli
-Date: 2025-06-25
+Date: 2025-08-18
 
 Usage:
 - Place this file in the data-pipeline/dags/ directory of your Airflow project.
