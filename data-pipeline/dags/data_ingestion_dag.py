@@ -70,10 +70,48 @@ def clean_csv(**context):
     df = df.drop_duplicates()
     print(f"[clean_csv] Dropped duplicates: {before - len(df)} rows removed.")
 
-    # 3. Handle missing values (drop rows with any NA, or impute as needed)
-    na_before = df.isna().sum().sum()
-    df = df.dropna()
-    print(f"[clean_csv] Dropped rows with missing values: {na_before} NA values removed.")
+
+    # 3. Analyze missing data mechanism and impute
+    na_total = df.isna().sum().sum()
+    print(f"[clean_csv] Total missing values before imputation: {na_total}")
+    if na_total > 0:
+        # MCAR/MAR/NMAR hint (simple heuristic)
+        na_cols = df.isna().sum()
+        if (na_cols == na_cols.iloc[0]).all():
+            print("[clean_csv] Missingness appears uniform across columns (possible MCAR).")
+        elif any(df.isna().sum() > 0):
+            print("[clean_csv] Missingness may depend on observed data (possible MAR or NMAR). Review domain knowledge.")
+
+        # Impute numeric columns with mean
+        num_cols = df.select_dtypes(include='number').columns
+        for col in num_cols:
+            if df[col].isna().any():
+                mean_val = df[col].mean()
+                df[col] = df[col].fillna(mean_val)
+                print(f"[clean_csv] Imputed numeric column '{col}' with mean: {mean_val}")
+
+        # Impute categorical columns with mode
+        cat_cols = df.select_dtypes(include='object').columns
+        for col in cat_cols:
+            if df[col].isna().any():
+                mode_val = df[col].mode().iloc[0] if not df[col].mode().empty else ''
+                df[col] = df[col].fillna(mode_val)
+                print(f"[clean_csv] Imputed categorical column '{col}' with mode: {mode_val}")
+
+        # Optional: KNN imputation if pyjanitor/sklearn is available (advanced)
+        try:
+            from sklearn.impute import KNNImputer
+            imputer = KNNImputer(n_neighbors=3)
+            df[num_cols] = imputer.fit_transform(df[num_cols])
+            print("[clean_csv] Applied KNN imputation to numeric columns.")
+        except ImportError:
+            print("[clean_csv] sklearn not available, skipping KNN imputation.")
+
+        na_after = df.isna().sum().sum()
+        print(f"[clean_csv] Total missing values after imputation: {na_after}")
+        if na_after > 0:
+            print(f"[clean_csv] {na_after} missing values remain after imputation. Dropping remaining rows with NA.")
+            df = df.dropna()
 
     # 4. Trim strings and convert types (example: try to parse dates)
     for col in df.select_dtypes(include='object').columns:
