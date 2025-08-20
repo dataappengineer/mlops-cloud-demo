@@ -182,7 +182,7 @@ def clean_csv(**context):
 def upload_to_s3(**context):
     ti = context['ti']
     cleaned_path = ti.xcom_pull(key='cleaned_csv_path', task_ids='clean_csv')
-    s3_bucket = context['params'].get('s3_bucket', 'your-s3-bucket-name')
+    s3_bucket = context['params'].get('s3_bucket', 'mlops-processed-data-982248023588')
     s3_key = os.path.basename(cleaned_path)
     print(f"Uploading {cleaned_path} to s3://{s3_bucket}/{s3_key}")
     s3 = boto3.client('s3')
@@ -231,7 +231,7 @@ with DAG(
         python_callable=upload_to_s3,
         provide_context=True,
         params={
-            's3_bucket': 'your-s3-bucket-name',  # <-- Replace with your actual S3 bucket
+            's3_bucket': 'mlops-processed-data-982248023588',
         },
     )
 
