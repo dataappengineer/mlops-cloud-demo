@@ -5,3 +5,5 @@ apache-airflow
 pyjanitor
 dataprep
 apache-airflow-providers-openlineage>=1.8.0
+scikit-learn
+joblib
