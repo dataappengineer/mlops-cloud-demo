@@ -12,6 +12,7 @@ This folder contains all guides and templates for securely setting up, managing,
 - `billing_and_cost_management.md`: How to set up budgets, Free Tier usage alerts, and monitor costs
 - `resource_cleanup.md`: How to identify and clean up unused AWS resources to minimize costs
 - `cloudwatch_vs_billing_alerts.md`: When to use CloudWatch alarms vs. Free Tier/Billing alerts, and how to set them up
+- `s3-bucket-config.md`: Configuration, usage, and best practices for the S3 bucket used to store processed MLOps data
 
 ## How to Use This Folder
 1. **Start with `aws_account_setup.md`** to create your AWS account, secure the root user, and set up IAM users and groups.
