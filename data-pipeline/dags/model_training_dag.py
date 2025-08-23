@@ -25,10 +25,44 @@ def train_model(**context):
     s3_key = os.path.basename(model_output_path)
 
     print(f"[train_model] Loading data from {validated_path}")
-    df = pd.read_csv(validated_path)
+    
+    # Try different delimiters to handle various CSV formats
+    try:
+        df = pd.read_csv(validated_path, sep=';')
+        print("[train_model] Successfully read semicolon-delimited file.")
+    except:
+        try:
+            df = pd.read_csv(validated_path)
+            print("[train_model] Successfully read comma-delimited file.")
+        except Exception as e:
+            print(f"[train_model] Error reading CSV: {e}")
+            raise
+    
+    print(f"[train_model] Dataset shape: {df.shape}")
+    print(f"[train_model] Column names: {list(df.columns)}")
+    print(f"[train_model] Data types:\n{df.dtypes}")
+    
+    # Ensure we have valid data
+    if df.empty:
+        raise ValueError("Dataset is empty!")
+    
+    if len(df.columns) < 2:
+        raise ValueError(f"Dataset must have at least 2 columns, got {len(df.columns)}")
+    
     # Example: Assume last column is target
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
+    
+    print(f"[train_model] Features shape: {X.shape}")
+    print(f"[train_model] Target shape: {y.shape}")
+    print(f"[train_model] Target unique values: {sorted(y.unique())}")
+    
+    # Ensure all features are numeric
+    if not all(X.dtypes.apply(lambda x: x.kind in 'biufc')):
+        print("[train_model] Warning: Non-numeric features detected. Converting to numeric.")
+        X = X.apply(pd.to_numeric, errors='coerce')
+        X = X.fillna(X.mean())  # Fill NaN with mean
+    
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     clf = RandomForestClassifier(n_estimators=100, random_state=42)
