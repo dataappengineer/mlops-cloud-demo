@@ -17,6 +17,43 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
+def detect_csv_format(file_path, sample_size=1000):
+    """
+    Auto-detect CSV format using industry best practices.
+    Uses Python's csv.Sniffer to detect delimiter, quoting, and other properties.
+    """
+    import csv
+    
+    # Common delimiters to test if Sniffer fails
+    common_delimiters = [',', ';', '\t', '|', ':', ' ']
+    
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        # Read sample for analysis
+        sample = f.read(sample_size)
+        
+        # Use csv.Sniffer for automatic detection
+        try:
+            sniffer = csv.Sniffer()
+            dialect = sniffer.sniff(sample, delimiters=',;\t|: ')
+            delimiter = dialect.delimiter
+            quotechar = dialect.quotechar
+            print(f"[detect_csv_format] Auto-detected delimiter: '{delimiter}', quote char: '{quotechar}'")
+            return delimiter, quotechar
+        except Exception as e:
+            print(f"[detect_csv_format] Sniffer failed: {e}. Using fallback method.")
+        
+        # Fallback: Count occurrences of each delimiter
+        delimiter_counts = {}
+        for delim in common_delimiters:
+            delimiter_counts[delim] = sample.count(delim)
+        
+        # Choose delimiter with highest count (most likely candidate)
+        best_delimiter = max(delimiter_counts, key=delimiter_counts.get)
+        print(f"[detect_csv_format] Fallback detected delimiter: '{best_delimiter}'")
+        print(f"[detect_csv_format] Delimiter counts: {delimiter_counts}")
+        
+        return best_delimiter, '"'
+
 def train_model(**context):
     # Path to validated data (produced by data_ingestion_dag)
     validated_path = context['params'].get('validated_path', '/opt/airflow/data/fetched_data_validated.csv')
@@ -26,17 +63,27 @@ def train_model(**context):
 
     print(f"[train_model] Loading data from {validated_path}")
     
-    # Try different delimiters to handle various CSV formats
+    # Auto-detect CSV format using industry best practices
+    delimiter, quotechar = detect_csv_format(validated_path)
+    
+    # Read CSV with detected format and encoding handling
     try:
-        df = pd.read_csv(validated_path, sep=';')
-        print("[train_model] Successfully read semicolon-delimited file.")
-    except:
-        try:
-            df = pd.read_csv(validated_path)
-            print("[train_model] Successfully read comma-delimited file.")
-        except Exception as e:
-            print(f"[train_model] Error reading CSV: {e}")
-            raise
+        df = pd.read_csv(validated_path, sep=delimiter, quotechar=quotechar, encoding='utf-8')
+        print(f"[train_model] Successfully read CSV with delimiter='{delimiter}', encoding='utf-8'")
+    except UnicodeDecodeError:
+        # Try different encodings if UTF-8 fails
+        for encoding in ['latin-1', 'iso-8859-1', 'cp1252']:
+            try:
+                df = pd.read_csv(validated_path, sep=delimiter, quotechar=quotechar, encoding=encoding)
+                print(f"[train_model] Successfully read CSV with delimiter='{delimiter}', encoding='{encoding}'")
+                break
+            except Exception:
+                continue
+        else:
+            raise ValueError("Could not read CSV with any supported encoding")
+    except Exception as e:
+        print(f"[train_model] Error reading CSV: {e}")
+        raise
     
     print(f"[train_model] Dataset shape: {df.shape}")
     print(f"[train_model] Column names: {list(df.columns)}")

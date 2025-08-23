@@ -97,9 +97,49 @@ def fetch_csv(**context):
     # Push the path to XCom for downstream tasks
     context['ti'].xcom_push(key='csv_path', value=output_path)
 
+def detect_csv_format(file_path, sample_size=1000):
+    """
+    Auto-detect CSV format using industry best practices.
+    Uses Python's csv.Sniffer to detect delimiter, quoting, and other properties.
+    """
+    import csv
+    import io
+    
+    # Common delimiters to test if Sniffer fails
+    common_delimiters = [',', ';', '\t', '|', ':', ' ']
+    
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        # Read sample for analysis
+        sample = f.read(sample_size)
+        f.seek(0)
+        
+        # Use csv.Sniffer for automatic detection
+        try:
+            sniffer = csv.Sniffer()
+            dialect = sniffer.sniff(sample, delimiters=',;\t|: ')
+            delimiter = dialect.delimiter
+            quotechar = dialect.quotechar
+            print(f"[detect_csv_format] Auto-detected delimiter: '{delimiter}', quote char: '{quotechar}'")
+            return delimiter, quotechar
+        except Exception as e:
+            print(f"[detect_csv_format] Sniffer failed: {e}. Using fallback method.")
+        
+        # Fallback: Count occurrences of each delimiter
+        delimiter_counts = {}
+        for delim in common_delimiters:
+            delimiter_counts[delim] = sample.count(delim)
+        
+        # Choose delimiter with highest count (most likely candidate)
+        best_delimiter = max(delimiter_counts, key=delimiter_counts.get)
+        print(f"[detect_csv_format] Fallback detected delimiter: '{best_delimiter}'")
+        print(f"[detect_csv_format] Delimiter counts: {delimiter_counts}")
+        
+        return best_delimiter, '"'
+
 def clean_csv(**context):
     """
     Advanced, portfolio-grade data cleaning function.
+    - Auto-detects CSV format (delimiter, quotes) using industry best practices
     - Standardizes column names, drops duplicates, trims strings, parses dates.
     - Handles missing data with imputation (mean, mode, KNN if available) and only drops rows as a last resort.
     - Analyzes missing data mechanisms:
@@ -113,17 +153,30 @@ def clean_csv(**context):
     cleaned_path = input_path.replace('.csv', '_cleaned.csv')
     print(f"[clean_csv] Cleaning CSV: {input_path} -> {cleaned_path}")
     
-    # Handle UCI Wine Quality dataset format (semicolon-delimited)
+    # Auto-detect CSV format
+    delimiter, quotechar = detect_csv_format(input_path)
+    
+    # Read CSV with detected format
     try:
-        df = pd.read_csv(input_path, sep=';')
-        print("[clean_csv] Successfully read semicolon-delimited file.")
-    except:
-        try:
-            df = pd.read_csv(input_path)
-            print("[clean_csv] Successfully read comma-delimited file.")
-        except Exception as e:
-            print(f"[clean_csv] Error reading CSV: {e}")
-            raise
+        df = pd.read_csv(input_path, sep=delimiter, quotechar=quotechar, encoding='utf-8')
+        print(f"[clean_csv] Successfully read CSV with delimiter='{delimiter}', encoding='utf-8'")
+    except UnicodeDecodeError:
+        # Try different encodings if UTF-8 fails
+        for encoding in ['latin-1', 'iso-8859-1', 'cp1252']:
+            try:
+                df = pd.read_csv(input_path, sep=delimiter, quotechar=quotechar, encoding=encoding)
+                print(f"[clean_csv] Successfully read CSV with delimiter='{delimiter}', encoding='{encoding}'")
+                break
+            except Exception:
+                continue
+        else:
+            raise ValueError("Could not read CSV with any supported encoding")
+    except Exception as e:
+        print(f"[clean_csv] Error reading CSV: {e}")
+        raise
+
+    print(f"[clean_csv] Initial dataset shape: {df.shape}")
+    print(f"[clean_csv] Initial columns: {list(df.columns)}")
 
     # 1. Standardize column names
     df = df.clean_names()  # pyjanitor: snake_case, lowercase
