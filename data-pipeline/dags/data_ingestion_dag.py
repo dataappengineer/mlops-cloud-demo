@@ -34,9 +34,18 @@ def validate_data(**context):
 Airflow DAG: data_ingestion_pipeline
 
 This DAG orchestrates a data ingestion pipeline with the following steps:
-- Fetch a CSV file from an external source (public URL or predefined location)
-- (To be added) Clean/process the data
-- (To be added) Upload the processed data to S3
+- Fetch a CSV file from an external source (UCI Wine Quality dataset by default)
+- Clean and process the data using advanced techniques
+- Validate data by detecting and removing outliers
+- Upload the processed data to S3
+
+Dataset: UCI Wine Quality (Red Wine)
+- 1,599 samples with 11 physicochemical features + quality rating (3-8)
+- Features: fixed acidity, volatile acidity, citric acid, residual sugar, 
+  chlorides, free sulfur dioxide, total sulfur dioxide, density, pH, 
+  sulphates, alcohol
+- Target: quality (wine quality score)
+- Real-world dataset with missing values and outliers for robust ML pipeline testing
 
 Author: Giovanni Brucoli
 Date: 2025-08-18
@@ -44,11 +53,13 @@ Date: 2025-08-18
 Usage:
 - Place this file in the data-pipeline/dags/ directory of your Airflow project.
 - The DAG runs daily and can be triggered manually for testing.
-- The fetch_csv task downloads a CSV and saves it to /tmp/fetched_data.csv by default.
+- The fetch_csv task downloads the UCI Wine Quality dataset by default.
 - Parameters can be customized in the PythonOperator params.
 
-Next steps:
-- Implement data cleaning and S3 upload tasks.
+Portfolio Value:
+- Demonstrates real-world data handling with a recognized ML benchmark dataset
+- Shows advanced data cleaning, validation, and cloud storage integration
+- Perfect for showcasing MLOps best practices with meaningful data
 """
 
 from airflow import DAG
@@ -75,7 +86,7 @@ default_args = {
 
 
 def fetch_csv(**context):
-    url = context['params'].get('csv_url', 'https://people.sc.fsu.edu/~jburkardt/data/csv/airtravel.csv')
+    url = context['params'].get('csv_url', 'https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv')
     output_path = context['params'].get('output_path', '/opt/airflow/data/fetched_data.csv')
     response = requests.get(url)
     response.raise_for_status()
@@ -101,7 +112,18 @@ def clean_csv(**context):
     input_path = ti.xcom_pull(key='csv_path', task_ids='fetch_csv')
     cleaned_path = input_path.replace('.csv', '_cleaned.csv')
     print(f"[clean_csv] Cleaning CSV: {input_path} -> {cleaned_path}")
-    df = pd.read_csv(input_path)
+    
+    # Handle UCI Wine Quality dataset format (semicolon-delimited)
+    try:
+        df = pd.read_csv(input_path, sep=';')
+        print("[clean_csv] Successfully read semicolon-delimited file.")
+    except:
+        try:
+            df = pd.read_csv(input_path)
+            print("[clean_csv] Successfully read comma-delimited file.")
+        except Exception as e:
+            print(f"[clean_csv] Error reading CSV: {e}")
+            raise
 
     # 1. Standardize column names
     df = df.clean_names()  # pyjanitor: snake_case, lowercase
@@ -177,6 +199,8 @@ def clean_csv(**context):
     # 6. Save cleaned file
     df.to_csv(cleaned_path, index=False)
     print(f"[clean_csv] Cleaned CSV saved to {cleaned_path}")
+    print(f"[clean_csv] Final dataset shape: {df.shape}")
+    print(f"[clean_csv] Column names: {list(df.columns)}")
     ti.xcom_push(key='cleaned_csv_path', value=cleaned_path)
 
 def upload_to_s3(**context):
@@ -209,7 +233,7 @@ with DAG(
         python_callable=fetch_csv,
         provide_context=True,
         params={
-            'csv_url': 'https://people.sc.fsu.edu/~jburkardt/data/csv/airtravel.csv',
+            'csv_url': 'https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv',
             'output_path': '/opt/airflow/data/fetched_data.csv',
         },
     )
