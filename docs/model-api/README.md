@@ -9,9 +9,14 @@ This section contains comprehensive documentation for the **Wine Quality Predict
 - **[Project Structure](./PROJECT_STRUCTURE.md)** - Detailed explanation of layered architecture and design patterns
 
 ### **Implementation Journey**
-*Coming in subsequent commits as we progress through the learning tutorial:*
 
-- **FastAPI Application Core** - Entry point, middleware, and routing
+#### **Application Core & Configuration**
+- **[FastAPI Deep Dive](./FASTAPI_DEEP_DIVE.md)** - Complete analysis of main.py, routing, middleware, and error handling
+- **[Configuration Management](./CONFIGURATION_MANAGEMENT.md)** - Environment-based configuration, validation, and deployment patterns
+
+#### **Coming in subsequent commits:**
+#### **Coming in subsequent commits:**
+
 - **Data Validation Models** - Pydantic models for robust input validation  
 - **Model Loading Service** - S3 integration and intelligent caching
 - **Prediction Logic** - Core endpoints with comprehensive error handling
