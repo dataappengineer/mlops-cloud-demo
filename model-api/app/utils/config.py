@@ -5,7 +5,8 @@ Handles environment variables, settings, and configuration validation.
 Uses Pydantic BaseSettings for environment variable management.
 """
 
-from pydantic import BaseSettings, Field
+from pydantic_settings import BaseSettings
+from pydantic import Field
 from typing import Optional
 import os
 
