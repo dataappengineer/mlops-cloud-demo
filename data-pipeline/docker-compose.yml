@@ -38,8 +38,8 @@ services:
           --role Admin \
           --email admin@example.com
     volumes:
-      - ./data-pipeline/dags:/opt/airflow/dags
-      - ./data-pipeline/data:/opt/airflow/data
+      - ./dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
     restart: on-failure
 
   airflow-webserver:
@@ -61,8 +61,8 @@ services:
       - "8080:8080"
     command: webserver
     volumes:
-      - ./data-pipeline/dags:/opt/airflow/dags
-      - ./data-pipeline/data:/opt/airflow/data
+      - ./dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
     restart: always
 
   airflow-scheduler:
@@ -82,6 +82,6 @@ services:
       AWS_DEFAULT_REGION: us-east-1
     command: scheduler
     volumes:
-      - ./data-pipeline/dags:/opt/airflow/dags
-      - ./data-pipeline/data:/opt/airflow/data
+      - ./dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
     restart: always

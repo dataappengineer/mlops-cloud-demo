@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  model-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mlops-model-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Application settings from .env are automatically loaded
+      - MODEL_CACHE_PATH=/app/model_cache
+      
+    volumes:
+      # Mount model cache (optional - for persistence)
+      - model_cache:/app/model_cache
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    networks:
+      - mlops-network
+
+volumes:
+  model_cache:
+    driver: local
+
+networks:
+  mlops-network:
+    driver: bridge
