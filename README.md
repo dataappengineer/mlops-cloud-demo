@@ -3,7 +3,8 @@
 > **Portfolio Project**: End-to-end MLOps pipeline showcasing data engineering, ML model training, cloud deployment, and infrastructure as code best practices.
 
 **🚀 Live Deployment**: ML API running on AWS ECS Fargate  
-**📊 API Endpoint**: `http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com`
+**📊 Status Dashboard**: https://dataappengineer.github.io/mlops-cloud-demo/  
+**🔗 API Endpoint**: `http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com`
 
 ![Deploy Status](https://github.com/dataappengineer/mlops-cloud-demo/actions/workflows/deploy-model-api.yml/badge.svg)
 
@@ -90,7 +91,8 @@ curl -X POST http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com/pr
 }
 ```
 
-**API Documentation**: Visit `http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com/docs` for interactive Swagger UI.
+**📊 Live Monitoring**: [View Status Dashboard](https://dataappengineer.github.io/mlops-cloud-demo/)  
+**📖 API Documentation**: Visit `http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com/docs` for interactive Swagger UI.
 
 ## 🚀 Quick Start
 
