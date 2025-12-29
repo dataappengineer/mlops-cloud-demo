@@ -14,6 +14,8 @@
 - ✅ **Production API Development** with FastAPI (health checks, structured logging, error handling)
 - ✅ **Cloud Infrastructure as Code** with Terraform (VPC, ECS Fargate, ALB, ECR, IAM)
 - ✅ **Container Orchestration** with Docker and AWS ECS
+- ✅ **CI/CD Pipeline** with GitHub Actions (automated testing and deployment)
+- ✅ **Production Monitoring** with CloudWatch (metrics, dashboards, alarms)
 - ✅ **Least-Privilege IAM** security practices (separate admin/dev users)
 
 ## 🏗️ Project Structure
@@ -166,7 +168,13 @@ aws ecs update-service \
 - **ECR**: Docker image registry with lifecycle policies
 - **IAM Roles**: Least-privilege task execution and S3 access roles
 - **Security Groups**: Network isolation (ALB → port 80, ECS → port 8000 from ALB only)
-- **CloudWatch Logs**: 7-day retention for container logs
+- **CloudWatch**: Custom metrics, dashboards, and log aggregation
+
+**Monitoring & Observability:**
+- **CloudWatch Metrics**: TotalRequests, Errors, AverageResponseTime, ModelLoaded
+- **CloudWatch Dashboards**: Real-time API health visualization
+- **CloudWatch Logs**: Structured logging with 7-day retention
+- **CI/CD Status Badge**: Live deployment health indicator
 
 **Cost Optimization:**
 - Free Tier eligible (750 ECS Fargate hours/month for 12 months)
@@ -184,9 +192,14 @@ aws ecs update-service \
 - ✅ **Infrastructure as Code**: Complete Terraform setup for AWS ECS deployment
 - ✅ **Cloud Deployment**: Live API on AWS ECS Fargate with Application Load Balancer
 - ✅ **Security**: IAM least-privilege policies, separate admin/dev users
-- 🚧 **Model Monitoring**: CloudWatch metrics and alerting (in progress)
-- 🚧 **CI/CD Pipeline**: GitHub Actions for automated deployments (planned)
-- 📋 **Docker Optimization**: Multi-stage builds for smaller images (backlog)
+- ✅ **CI/CD Pipeline**: GitHub Actions with automated testing and deployments
+- ✅ **Production Monitoring**: CloudWatch metrics, dashboards, and alarms
+
+**Future Enhancements:**
+- 📋 Analytics UI Dashboard (Issue #9)
+- 📋 Docker Optimization: Multi-stage builds for smaller images (Issue #26)
+- 📋 A/B Testing Framework
+- 📋 MLflow Integration for experiment tracking
 
 ## 💡 Key Technical Achievements
 
@@ -210,16 +223,28 @@ This project showcases:
 - Request/response validation with Pydantic
 - Structured logging and error handling
 - Sub-20ms prediction latency
+- CloudWatch metrics integration
 
 **Software Engineering:**
 - Monorepo structure with independent components
 - Git best practices (conventional commits, feature branches, PRs)
+- CI/CD with GitHub Actions (test → build → deploy)
 - Documentation-first development
 - Environment-specific configurations
+
+**DevOps & Monitoring:**
+- Automated deployments with zero-downtime rolling updates
+- Production monitoring with CloudWatch dashboards
+- Comprehensive test coverage with pytest
+- Infrastructure as Code with Terraform
 
 See [learning-journey.md](./docs/learning-journey.md) for detailed technical stories and problem-solving approaches.
 
 ---
+
+**Status**: Production-Ready ✅  
+**Last Updated**: December 29, 2025  
+**Author**: Giovanni Brucoli ([dataappengineer](https://github.com/dataappengineer))
 
 **Status**: Deployed to Production (AWS ECS)  
 **Last Updated**: December 28, 2025  
