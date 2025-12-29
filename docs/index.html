@@ -150,6 +150,18 @@
             color: #718096;
         }
 
+        .endpoint-link {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .endpoint-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
         .last-updated {
             text-align: center;
             color: #a0aec0;
@@ -250,6 +262,14 @@
                         <span class="endpoint-name">Metrics</span>
                         <span class="endpoint-status" id="metrics-status">
                             <span class="status-dot"></span> Checking...
+                        </span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="endpoint-name">API Documentation</span>
+                        <span class="endpoint-status">
+                            <a href="http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com/docs" 
+                               target="_blank" 
+                               class="endpoint-link">View Docs →</a>
                         </span>
                     </div>
                 </div>
@@ -357,27 +377,21 @@
                 document.getElementById('total-requests').textContent = 'Live';
                 document.getElementById('predictions').textContent = 'Live';
                 
-                updateEndpointStatus('health-status', true, 'View Live →');
-                updateEndpointStatus('predict-status', true, 'View Live →');
-                updateEndpointStatus('metrics-status', true, 'View Live →');
+                updateEndpointStatus('health-status', 'http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com/health');
+                updateEndpointStatus('predict-status', 'http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com/docs#/default/predict_wine_quality_predict_post');
+                updateEndpointStatus('metrics-status', 'http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com/metrics');
                 
                 document.getElementById('last-updated').textContent = 
                     `API running on AWS ECS Fargate`;
             }
         }
         
-        function updateEndpointStatus(elementId, isHealthy, customText = null) {
+        function updateEndpointStatus(elementId, linkUrl) {
             const element = document.getElementById(elementId);
-            const dot = element.querySelector('.status-dot');
-            
-            if (isHealthy) {
-                dot.className = 'status-dot green';
-                const text = customText || 'Operational';
-                element.innerHTML = `<span class="status-dot green"></span> ${text}`;
-            } else {
-                dot.className = 'status-dot red';
-                element.innerHTML = `<span class="status-dot red"></span> Down`;
-            }
+            element.innerHTML = `
+                <span class="status-dot green"></span>
+                <a href="${linkUrl}" target="_blank" class="endpoint-link">View Live →</a>
+            `;
         }
         
         // Initial fetch
