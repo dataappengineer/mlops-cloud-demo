@@ -42,3 +42,8 @@ airflow.cfg
 *.csv
 *.joblib
 data/
+
+# Private notes (not for git)
+INTERVIEW_NOTES.md
+portfolio-notes.md
+*-private.md
