@@ -5,6 +5,8 @@
 **🚀 Live Deployment**: ML API running on AWS ECS Fargate  
 **📊 API Endpoint**: `http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com`
 
+![Deploy Status](https://github.com/dataappengineer/mlops-cloud-demo/actions/workflows/deploy-model-api.yml/badge.svg)
+
 ## 🎯 What This Project Demonstrates
 
 - ✅ **Data Pipeline Orchestration** with Apache Airflow
