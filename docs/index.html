@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLOps Wine Quality API - Status</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .status-badge.operational {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-badge.degraded {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .status-badge.down {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-dot.green {
+            background: #48bb78;
+        }
+
+        .status-dot.yellow {
+            background: #ed8936;
+        }
+
+        .status-dot.red {
+            background: #f56565;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .metric-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .metric-label {
+            color: #718096;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .metric-unit {
+            color: #a0aec0;
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+
+        .endpoint-list {
+            margin-top: 20px;
+        }
+
+        .endpoint {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .endpoint-name {
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .endpoint-status {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 0.85rem;
+            margin-top: 20px;
+        }
+
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .github-link:hover {
+            color: #764ba2;
+        }
+
+        .loading {
+            text-align: center;
+            color: #718096;
+            padding: 40px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🍷 MLOps Wine Quality API</h1>
+            <p class="subtitle">Production ML Model Serving</p>
+
+            <div id="status-container">
+                <div class="loading">Loading status...</div>
+            </div>
+
+            <div id="metrics-container" style="display: none;">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Uptime</div>
+                        <div class="metric-value" id="uptime">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Response Time</div>
+                        <div class="metric-value">
+                            <span id="response-time">--</span>
+                            <span class="metric-unit">ms</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Requests</div>
+                        <div class="metric-value" id="total-requests">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Predictions Made</div>
+                        <div class="metric-value" id="predictions">--</div>
+                    </div>
+                </div>
+
+                <div class="endpoint-list">
+                    <h3 style="color: #2d3748; margin-bottom: 15px;">API Endpoints</h3>
+                    <div class="endpoint">
+                        <span class="endpoint-name">Health Check</span>
+                        <span class="endpoint-status" id="health-status">
+                            <span class="status-dot"></span> Checking...
+                        </span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="endpoint-name">Prediction Service</span>
+                        <span class="endpoint-status" id="predict-status">
+                            <span class="status-dot"></span> Checking...
+                        </span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="endpoint-name">Metrics</span>
+                        <span class="endpoint-status" id="metrics-status">
+                            <span class="status-dot"></span> Checking...
+                        </span>
+                    </div>
+                </div>
+
+                <div class="last-updated" id="last-updated">Last updated: --</div>
+            </div>
+
+            <a href="https://github.com/dataappengineer/mlops-cloud-demo" class="github-link" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                View on GitHub
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>Powered by AWS ECS Fargate | Monitored with CloudWatch</p>
+            <p><a href="http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com/docs" target="_blank">API Documentation</a></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com';
+        
+        async function fetchStatus() {
+            try {
+                const startTime = performance.now();
+                
+                // Fetch health
+                const healthResponse = await fetch(`${API_BASE_URL}/health`);
+                const healthData = await healthResponse.json();
+                
+                const responseTime = Math.round(performance.now() - startTime);
+                
+                // Fetch metrics
+                const metricsResponse = await fetch(`${API_BASE_URL}/metrics`);
+                const metricsData = await metricsResponse.json();
+                
+                // Update status badge
+                const statusContainer = document.getElementById('status-container');
+                const isHealthy = healthData.status === 'healthy';
+                
+                statusContainer.innerHTML = `
+                    <div class="status-badge ${isHealthy ? 'operational' : 'down'}">
+                        <span class="status-dot ${isHealthy ? 'green' : 'red'}"></span>
+                        ${isHealthy ? 'All Systems Operational' : 'Service Degraded'}
+                    </div>
+                `;
+                
+                // Show metrics container
+                document.getElementById('metrics-container').style.display = 'block';
+                
+                // Update metrics
+                const uptimeSeconds = metricsData.system_metrics?.uptime_seconds || 0;
+                const uptimeHours = Math.floor(uptimeSeconds / 3600);
+                const uptimeDays = Math.floor(uptimeHours / 24);
+                
+                let uptimeDisplay = uptimeDays > 0 
+                    ? `${uptimeDays}d ${uptimeHours % 24}h`
+                    : `${uptimeHours}h`;
+                
+                document.getElementById('uptime').textContent = uptimeDisplay;
+                document.getElementById('response-time').textContent = responseTime;
+                document.getElementById('total-requests').textContent = 
+                    metricsData.api_metrics?.total_requests || 0;
+                document.getElementById('predictions').textContent = 
+                    metricsData.api_metrics?.total_predictions || 0;
+                
+                // Update endpoint statuses
+                updateEndpointStatus('health-status', true);
+                updateEndpointStatus('predict-status', healthData.model_loaded);
+                updateEndpointStatus('metrics-status', true);
+                
+                // Update timestamp
+                document.getElementById('last-updated').textContent = 
+                    `Last updated: ${new Date().toLocaleString()}`;
+                
+            } catch (error) {
+                console.error('Failed to fetch status:', error);
+                document.getElementById('status-container').innerHTML = `
+                    <div class="status-badge down">
+                        <span class="status-dot red"></span>
+                        Unable to Reach API
+                    </div>
+                `;
+                
+                // Show error message in metrics
+                document.getElementById('metrics-container').style.display = 'block';
+                updateEndpointStatus('health-status', false);
+                updateEndpointStatus('predict-status', false);
+                updateEndpointStatus('metrics-status', false);
+            }
+        }
+        
+        function updateEndpointStatus(elementId, isHealthy) {
+            const element = document.getElementById(elementId);
+            const dot = element.querySelector('.status-dot');
+            
+            if (isHealthy) {
+                dot.className = 'status-dot green';
+                element.innerHTML = `<span class="status-dot green"></span> Operational`;
+            } else {
+                dot.className = 'status-dot red';
+                element.innerHTML = `<span class="status-dot red"></span> Down`;
+            }
+        }
+        
+        // Initial fetch
+        fetchStatus();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(fetchStatus, 30000);
+    </script>
+</body>
+</html>
