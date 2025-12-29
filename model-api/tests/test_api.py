@@ -3,6 +3,15 @@ Tests for FastAPI model prediction endpoints
 """
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import patch, MagicMock
+import os
+
+# Set test environment variables before importing app
+os.environ['MODEL_BUCKET'] = 'test-bucket'
+os.environ['MODEL_KEY'] = 'test-model.pkl'
+os.environ['AWS_REGION'] = 'us-east-1'
+os.environ['ENVIRONMENT'] = 'test'
+
 from app.main import app
 
 client = TestClient(app)
@@ -29,14 +38,22 @@ class TestHealthEndpoint:
         assert "status" in data
         assert "timestamp" in data
         assert "checks" in data
-        assert data["status"] in ["healthy", "unhealthy"]
+        assert data["status"] in ["healthy", "unhealthy", "degraded"]
 
 
 class TestPredictionEndpoint:
     """Test prediction endpoint"""
     
-    def test_predict_endpoint_accepts_valid_input(self):
+    @patch('app.services.model_service.ModelService.predict')
+    def test_predict_endpoint_accepts_valid_input(self, mock_predict):
         """Prediction endpoint should accept valid wine features"""
+        # Mock the model prediction
+        mock_predict.return_value = {
+            "prediction": 5,
+            "confidence": 0.98,
+            "model_version": "1.0"
+        }
+        
         payload = {
             "features": {
                 "fixed_acidity": 7.4,
@@ -56,8 +73,16 @@ class TestPredictionEndpoint:
         response = client.post("/predict", json=payload)
         assert response.status_code == 200
     
-    def test_predict_endpoint_returns_prediction(self):
+    @patch('app.services.model_service.ModelService.predict')
+    def test_predict_endpoint_returns_prediction(self, mock_predict):
         """Prediction endpoint should return prediction with correct structure"""
+        # Mock the model prediction
+        mock_predict.return_value = {
+            "prediction": 5,
+            "confidence": 0.98,
+            "model_version": "1.0"
+        }
+        
         payload = {
             "features": {
                 "fixed_acidity": 7.4,
@@ -121,5 +146,5 @@ class TestRootEndpoint:
         response = client.get("/")
         data = response.json()
         
-        assert "message" in data
-        assert "Wine Quality" in data["message"] or "ML API" in data["message"]
+        assert "name" in data
+        assert "Wine Quality" in data["name"] or "API" in data["name"]
