@@ -261,6 +261,7 @@ This project showcases:
 - Containerization with Docker (multi-stage builds, health checks)
 - AWS cloud architecture (Fargate, ECR, CloudWatch, S3)
 - Security best practices (least-privilege IAM, MFA, Security Groups)
+- CI/CD with GitHub Actions (test → build → deploy)
 
 **Data Engineering:**
 - Workflow orchestration with Apache Airflow
@@ -275,28 +276,18 @@ This project showcases:
 - Structured logging and error handling
 - Sub-20ms prediction latency
 - CloudWatch metrics integration
+- Comprehensive test coverage with pytest
 
 **Software Engineering:**
 - Monorepo structure with independent components
 - Git best practices (conventional commits, feature branches, PRs)
-- CI/CD with GitHub Actions (test → build → deploy)
 - Documentation-first development
 - Environment-specific configurations
 
-**DevOps & Monitoring:**
-- Automated deployments with zero-downtime rolling updates
-- Production monitoring with CloudWatch dashboards
-- Comprehensive test coverage with pytest
-- Infrastructure as Code with Terraform
-
-See [learning-journey.md](./docs/learning-journey.md) for detailed technical stories and problem-solving approaches.
+See [docs/learning-journey.md](./docs/learning-journey.md) and [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed technical stories and problem-solving approaches.
 
 ---
 
 **Status**: Production-Ready ✅  
 **Last Updated**: December 29, 2025  
-**Author**: Giovanni Brucoli ([dataappengineer](https://github.com/dataappengineer))
-
-**Status**: Deployed to Production (AWS ECS)  
-**Last Updated**: December 28, 2025  
 **Author**: Giovanni Brucoli ([dataappengineer](https://github.com/dataappengineer))
