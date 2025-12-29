@@ -21,6 +21,7 @@ from typing import Dict, Any, List
 from app.models.prediction import WineFeaturesRequest, BatchPredictionRequest, PredictionResponse, HealthResponse
 from app.services.model_service import ModelService
 from app.utils.config import get_settings
+from app.utils.cloudwatch import cloudwatch_publisher
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -132,7 +133,7 @@ async def health_check():
 @app.get("/metrics", response_model=Dict[str, Any])
 async def get_metrics():
     """API metrics endpoint for monitoring"""
-    return {
+    metrics_data = {
         "api_metrics": request_metrics,
         "model_metrics": {
             "model_loaded": model_service.is_model_loaded(),
@@ -144,6 +145,14 @@ async def get_metrics():
             "uptime_seconds": int(time.time() - getattr(app.state, 'start_time', time.time()))
         }
     }
+    
+    # Publish to CloudWatch (non-blocking)
+    try:
+        cloudwatch_publisher.publish_metrics(metrics_data)
+    except Exception as e:
+        logger.warning(f"Failed to publish CloudWatch metrics: {e}")
+    
+    return metrics_data
 
 
 @app.post("/predict", response_model=PredictionResponse)

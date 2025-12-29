@@ -47,3 +47,4 @@ data/
 INTERVIEW_NOTES.md
 portfolio-notes.md
 *-private.md
+infrastructure/terraform/terraform.tfvars
