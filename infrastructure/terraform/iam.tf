@@ -82,3 +82,22 @@ resource "aws_iam_role_policy" "ecs_task_logs_policy" {
     ]
   })
 }
+
+# Policy for CloudWatch Metrics
+resource "aws_iam_role_policy" "ecs_task_metrics_policy" {
+  name = "${var.project_name}-${var.environment}-metrics-access"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:PutMetricData"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
