@@ -237,8 +237,6 @@ aws ecs update-service \
 
 ## 🎯 Project Milestones
 
-## 🎯 Project Milestones
-
 - ✅ **Data Pipeline**: Automated Airflow DAGs for ingestion, validation, and S3 upload
 - ✅ **Model Training**: Wine quality prediction with scikit-learn
 - ✅ **REST API**: FastAPI with Pydantic validation, structured logging, health checks
