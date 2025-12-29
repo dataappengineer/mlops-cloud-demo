@@ -3,7 +3,7 @@ Tests for FastAPI model prediction endpoints
 """
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 import os
 
 # Set test environment variables before importing app
@@ -15,6 +15,22 @@ os.environ['ENVIRONMENT'] = 'test'
 from app.main import app
 
 client = TestClient(app)
+
+
+@pytest.fixture
+def mock_model_service():
+    """Mock the model service for prediction tests"""
+    with patch('app.main.model_service') as mock:
+        # Mock the predict method as an async function
+        mock.predict = AsyncMock(return_value={
+            "prediction": 5,
+            "confidence": 0.98,
+            "model_version": "1.0"
+        })
+        # Mock load_model to avoid startup errors
+        mock.load_model = AsyncMock()
+        mock.model_loaded = True
+        yield mock
 
 
 class TestHealthEndpoint:
@@ -44,16 +60,8 @@ class TestHealthEndpoint:
 class TestPredictionEndpoint:
     """Test prediction endpoint"""
     
-    @patch('app.services.model_service.ModelService.predict')
-    def test_predict_endpoint_accepts_valid_input(self, mock_predict):
+    def test_predict_endpoint_accepts_valid_input(self, mock_model_service):
         """Prediction endpoint should accept valid wine features"""
-        # Mock the model prediction
-        mock_predict.return_value = {
-            "prediction": 5,
-            "confidence": 0.98,
-            "model_version": "1.0"
-        }
-        
         payload = {
             "features": {
                 "fixed_acidity": 7.4,
@@ -73,16 +81,8 @@ class TestPredictionEndpoint:
         response = client.post("/predict", json=payload)
         assert response.status_code == 200
     
-    @patch('app.services.model_service.ModelService.predict')
-    def test_predict_endpoint_returns_prediction(self, mock_predict):
+    def test_predict_endpoint_returns_prediction(self, mock_model_service):
         """Prediction endpoint should return prediction with correct structure"""
-        # Mock the model prediction
-        mock_predict.return_value = {
-            "prediction": 5,
-            "confidence": 0.98,
-            "model_version": "1.0"
-        }
-        
         payload = {
             "features": {
                 "fixed_acidity": 7.4,
