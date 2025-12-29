@@ -4,9 +4,60 @@
 
 **🚀 Live Deployment**: ML API running on AWS ECS Fargate  
 **📊 Status Dashboard**: https://dataappengineer.github.io/mlops-cloud-demo/  
-**🔗 API Endpoint**: `http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com`
+**🔗 API Endpoint**: `http://mlops-demo-dev-alb-1849542828.us-east-1.elb.amazonaws.com`  
+**📋 Project Board**: [View Development Progress](https://github.com/users/dataappengineer/projects/9/views/1)
 
 ![Deploy Status](https://github.com/dataappengineer/mlops-cloud-demo/actions/workflows/deploy-model-api.yml/badge.svg)
+
+## 🏗️ Architecture
+
+```mermaid
+graph TB
+    subgraph "Development"
+        Dev[Developer] -->|git push| GH[GitHub]
+    end
+    
+    subgraph "CI/CD - GitHub Actions"
+        GH -->|trigger| CI[Build & Test]
+        CI -->|docker build| ECR[AWS ECR]
+        CI -->|deploy| ECS[ECS Service Update]
+    end
+    
+    subgraph "AWS Cloud Infrastructure"
+        subgraph "VPC - us-east-1"
+            ALB[Application Load Balancer<br/>Port 80]
+            
+            subgraph "ECS Fargate Cluster"
+                Task1[ECS Task<br/>FastAPI Container<br/>0.25 vCPU, 512MB RAM]
+            end
+            
+            ALB -->|route traffic| Task1
+            Task1 -->|load model| S3[S3 Bucket<br/>ml-models/wine-quality-model.pkl]
+        end
+        
+        subgraph "Monitoring"
+            Task1 -->|logs| CWL[CloudWatch Logs]
+            Task1 -->|metrics| CWM[CloudWatch Metrics<br/>TotalRequests, Errors, Latency]
+            CWM --> Dashboard[CloudWatch Dashboard<br/>MLOps-Model-API]
+        end
+    end
+    
+    subgraph "Users"
+        Client[API Clients] -->|HTTP requests| ALB
+        Status[Status Page<br/>GitHub Pages] -.->|monitor| Dashboard
+    end
+    
+    subgraph "Data Pipeline - Airflow"
+        Airflow[Apache Airflow DAGs] -->|upload| S3
+        Airflow -->|train| Model[scikit-learn Model]
+        Model -->|save| S3
+    end
+    
+    style Task1 fill:#4CAF50
+    style Dashboard fill:#FF9800
+    style S3 fill:#2196F3
+    style ALB fill:#9C27B0
+```
 
 ## 🎯 What This Project Demonstrates
 
