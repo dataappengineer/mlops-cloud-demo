@@ -10,9 +10,10 @@ Features:
 - Health monitoring
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 import uvicorn
 import time
 import logging
@@ -55,6 +56,37 @@ request_metrics = {
     "average_response_time": 0.0,
     "errors": 0
 }
+
+
+# Middleware to publish metrics after each request
+class MetricsMiddleware(BaseHTTPMiddleware):
+    """Middleware to automatically publish CloudWatch metrics after each request"""
+    
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        
+        # Publish metrics to CloudWatch (non-blocking, best effort)
+        try:
+            metrics_data = {
+                "api_metrics": {
+                    "total_requests": request_metrics["total_requests"],
+                    "total_predictions": request_metrics["total_predictions"],
+                    "average_response_time": request_metrics["average_response_time"],
+                    "errors": request_metrics["errors"]
+                },
+                "model_metrics": {
+                    "model_loaded": model_service.is_model_loaded()
+                }
+            }
+            cloudwatch_publisher.publish_metrics(metrics_data)
+        except Exception as e:
+            logger.debug(f"CloudWatch publish failed (non-critical): {e}")
+        
+        return response
+
+
+# Add metrics middleware
+app.add_middleware(MetricsMiddleware)
 
 
 @app.on_event("startup")
