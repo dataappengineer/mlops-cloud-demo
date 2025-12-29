@@ -193,6 +193,73 @@ This debugging journey demonstrates:
 
 ---
 
+## Challenge 4: CloudWatch IAM Permissions
+
+### Problem
+```
+ERROR:app.utils.cloudwatch:Failed to publish metrics to CloudWatch: 
+An error occurred (AccessDenied) when calling the PutMetricData operation: 
+User: arn:aws:sts::982248023588:assumed-role/mlops-demo-dev-ecs-task-role 
+is not authorized to perform: cloudwatch:PutMetricData
+```
+
+Dashboard showed "No data available" despite code being deployed successfully.
+
+### Root Cause
+The ECS task role had permissions for:
+- ✅ S3 access (GetObject, ListBucket)
+- ✅ CloudWatch Logs (CreateLogGroup, PutLogEvents)
+- ❌ CloudWatch Metrics (PutMetricData) - **MISSING**
+
+When the application called `cloudwatch_publisher.publish_metrics()`, boto3 failed silently and logged the AccessDenied error.
+
+### Solution
+Added new IAM policy to Terraform ([iam.tf](../../infrastructure/terraform/iam.tf)):
+
+```hcl
+resource "aws_iam_role_policy" "ecs_task_metrics_policy" {
+  name = "${var.project_name}-${var.environment}-metrics-access"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "cloudwatch:PutMetricData"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+```
+
+Applied with:
+```bash
+terraform apply -auto-approve
+aws ecs update-service --force-new-deployment  # Pick up new IAM permissions
+```
+
+### Key Insights
+
+1. **IAM is attached to tasks, not services**: Changing IAM policies requires restarting tasks
+2. **Test IAM early**: Check CloudWatch Logs for AccessDenied errors immediately after deployment
+3. **Metrics vs Logs**: CloudWatch has separate permissions for logs (PutLogEvents) and metrics (PutMetricData)
+4. **Resource = "*" for metrics**: Unlike S3/ECR, CloudWatch metrics don't require specific resource ARNs
+
+### Debugging Process
+1. Checked CloudWatch dashboard → "No data available"
+2. Checked CloudWatch Logs → Found AccessDenied errors
+3. Identified missing IAM permission from error message
+4. Added policy to Terraform
+5. Applied infrastructure change
+6. Forced ECS redeployment
+7. Verified metrics started flowing to dashboard
+
+---
+
 ## Related Documentation
 - [CI/CD Setup Guide](../../.github/CI_CD_SETUP.md)
 - [GitHub Actions Workflow](../../.github/workflows/deploy-model-api.yml)
