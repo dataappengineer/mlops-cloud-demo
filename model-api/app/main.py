@@ -65,6 +65,10 @@ class MetricsMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
         
+        # Skip metrics publishing for health checks to reduce CloudWatch costs
+        if request.url.path in ["/health", "/metrics"]:
+            return response
+        
         # Publish metrics to CloudWatch (non-blocking, best effort)
         try:
             metrics_data = {
