@@ -4,7 +4,7 @@ resource "aws_ecs_cluster" "main" {
 
   setting {
     name  = "containerInsights"
-    value = "enabled"
+    value = "disabled"  # Disabled to avoid 38 metrics generating $9.90/month CloudWatch overage
   }
 
   tags = var.tags
