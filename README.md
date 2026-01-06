@@ -9,6 +9,60 @@
 
 ![Deploy Status](https://github.com/dataappengineer/mlops-cloud-demo/actions/workflows/deploy-model-api.yml/badge.svg)
 
+---
+
+## 💼 Project Context: Real Production ML Under Budget
+
+This project demonstrates **cost-efficient MLOps for startups** through a realistic scenario: [VinoExpress](docs/business-case/vinoexpress-client-brief.md), a Colombian wine distributor needing automated quality prediction under a **$450/month infrastructure budget**.
+
+**The Challenge**: Deploy a production ML API (24/7 availability, <1 second response time) while evaluating AWS SageMaker ($150-200/month), AWS EKS ($93-113/month), and AWS ECS Fargate.
+
+**The Solution**: ECS Fargate at **$12.34/month** (97% under budget) — achieved through systematic optimization:
+- Started at $21.24/month (unoptimized)
+- Discovered two cost leaks via CloudWatch monitoring
+- Optimized to $12.34/month in 48 hours (42% reduction)
+
+**Why This Matters**: Budget-conscious startups (US, EU, LATAM, global) need evidence-based infrastructure decisions. This project proves **cost transparency as competitive advantage** — not promises, but receipts (AWS billing data, CloudWatch metrics, systematic verification).
+
+📖 **Read the full story**: [VinoExpress Client Brief](docs/business-case/vinoexpress-client-brief.md)  
+📊 **Architecture decisions**: [Decision Matrix: SageMaker vs EKS vs ECS](docs/business-case/architecture-decision-matrix.md)  
+💰 **Detailed costs**: [AWS Cost Reference](docs/AWS_COST_REFERENCE.md)
+
+---
+
+## 💰 Cost Transparency: The Optimization Journey
+
+**Monthly Cost Evolution:**
+- **Starting Point** (Dec 28, 2025): $21.24/month (unoptimized)
+- **After Optimization** (Jan 5, 2026): **$12.34/month** (42% reduction)
+- **Post-Free-Tier** (June 2026+): $38.56/month
+
+**How We Got Here:**
+
+1. **Discovery** (Jan 4): CloudWatch monitoring revealed health check overhead consuming 95% of free tier API quota
+   - **Action**: Disabled metrics for health endpoints (preserved logging)
+   - **Savings**: ~$8.00/month
+
+2. **Discovery** (Jan 5): ECS ContainerInsights publishing 38 metrics (28-metric overage)
+   - **Action**: Disabled ContainerInsights, kept 5 business-critical metrics
+   - **Savings**: $9.90/month
+
+3. **Verification** (Jan 6): 48-hour checkpoint confirmed both optimizations working
+   - AWS CLI metrics: ContainerInsights stopped publishing ✅
+   - CloudWatch logs: Health checks running but not metering ✅
+   - AWS billing: Tracking $8.11/month Fargate (under $8.89 projected) ✅
+
+**Current Infrastructure Cost:**
+- **ECS Fargate**: $8.89/month (0.25 vCPU, 512MB, 24/7)
+- **VPC Public IPv4**: $3.45/month (2 Elastic IPs, overage after 750 free hours)
+- **Everything Else**: $0.00 (within AWS Free Tier limits)
+
+**Key Insight**: Cost efficiency isn't about "picking cheapest" — it's about **systematic monitoring → discovery → optimization → verification**. Every decision is documented with evidence ([Issues #28](https://github.com/dataappengineer/mlops-cloud-demo/issues/28), [#30](https://github.com/dataappengineer/mlops-cloud-demo/issues/30), [#31](https://github.com/dataappengineer/mlops-cloud-demo/issues/31)).
+
+💡 **For Startups**: This demonstrates capability to deliver production ML without breaking the bank — critical for remote teams, bootstrapped founders, and cost-conscious scale-ups globally.
+
+---
+
 ## 🏗️ Architecture
 
 ```mermaid
@@ -61,6 +115,13 @@ graph TB
 
 ## 🎯 What This Project Demonstrates
 
+### Business & Strategic Skills
+- ✅ **Cost-Aware Architecture Decisions** — Evaluated SageMaker, EKS, and ECS Fargate with [decision matrix](docs/business-case/architecture-decision-matrix.md)
+- ✅ **Evidence-Based Optimization** — Reduced costs 42% through systematic monitoring (see [optimization journey](docs/business-case/vinoexpress-client-brief.md#the-optimization-journey))
+- ✅ **Transparent Cost Tracking** — All AWS billing documented in [cost reference](docs/AWS_COST_REFERENCE.md)
+- ✅ **Business Case Development** — Real client scenario with budget constraints and ROI analysis
+
+### Technical & Engineering Skills
 - ✅ **Data Pipeline Orchestration** with Apache Airflow
 - ✅ **ML Model Training & Artifact Management** with scikit-learn and S3
 - ✅ **Production API Development** with FastAPI (health checks, structured logging, error handling)
@@ -207,6 +268,12 @@ aws ecs update-service \
 
 ## 📚 Documentation
 
+### Business Case & Cost Analysis
+- **[VinoExpress Client Brief](./docs/business-case/vinoexpress-client-brief.md)**: Real client scenario demonstrating cost-efficient ML deployment ($12.34/month for 24/7 API)
+- **[Architecture Decision Matrix](./docs/business-case/architecture-decision-matrix.md)**: Comprehensive comparison of SageMaker vs EKS vs ECS Fargate with graduation path
+- **[AWS Cost Reference](./docs/AWS_COST_REFERENCE.md)**: Detailed cost breakdown, optimization strategies, and billing verification
+
+### Technical Documentation
 - **[ECS Architecture Explained](./docs/aws-setup/ecs-architecture-explained.md)**: Deep dive into AWS ECS Fargate, ALB, and networking
 - **[Learning Journey](./docs/learning-journey.md)**: Iterative development process, challenges, and solutions
 - **[AWS Setup](./docs/aws-setup/)**: Detailed AWS configuration, IAM policies, and security best practices
@@ -230,10 +297,13 @@ aws ecs update-service \
 - **CI/CD Status Badge**: Live deployment health indicator
 
 **Cost Optimization:**
-- Free Tier eligible (750 ECS Fargate hours/month for 12 months)
-- NAT Gateway disabled (tasks use public IPs in private subnets)
-- Minimal compute resources (0.25 vCPU)
-- Expected cost: ~$0/month (Free Tier) → ~$25/month after 12 months
+- **Current (Free Tier)**: $12.34/month — Optimized through systematic monitoring
+  - Health check metrics disabled (Issue #28): ~$8.00/month saved
+  - ContainerInsights disabled (Issue #31): $9.90/month saved
+  - Total reduction: $21.24 → $12.34 (42% savings)
+- **Post-Free-Tier** (June 2026+): $38.56/month
+- **Architecture rationale**: [Why ECS over SageMaker/EKS](./docs/business-case/architecture-decision-matrix.md)
+- **Detailed breakdown**: [AWS Cost Reference](./docs/AWS_COST_REFERENCE.md)
 
 ## 🎯 Project Milestones
 
@@ -255,6 +325,13 @@ aws ecs update-service \
 ## 💡 Key Technical Achievements
 
 This project showcases:
+
+**Business & Strategic Thinking:**
+- Cost-efficient architecture selection (68-92% savings vs SageMaker/EKS)
+- Evidence-based decision making with real AWS billing data
+- Systematic optimization through monitoring and iteration
+- Client-facing documentation demonstrating business value
+- Transparent cost tracking (not estimates, but receipts)
 
 **Infrastructure & DevOps:**
 - Infrastructure as Code with Terraform (VPC, ECS, ALB, IAM)
@@ -284,10 +361,11 @@ This project showcases:
 - Documentation-first development
 - Environment-specific configurations
 
-See [docs/learning-journey.md](./docs/learning-journey.md) and [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed technical stories and problem-solving approaches.
+See [docs/learning-journey.md](./docs/learning-journey.md) and [docs/business-case/](./docs/business-case/) for detailed technical stories, problem-solving approaches, and business case development.
 
 ---
 
-**Status**: Production-Ready ✅  
-**Last Updated**: December 29, 2025  
-**Author**: Giovanni Brucoli ([dataappengineer](https://github.com/dataappengineer))
+**Status**: Production-Ready ✅ | **Monthly Cost**: $12.34 (optimized)  
+**Last Updated**: January 6, 2026  
+**Author**: Giovanni Brucoli ([dataappengineer](https://github.com/dataappengineer))  
+**Portfolio Focus**: Cost-efficient MLOps for startups globally
