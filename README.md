@@ -1,5 +1,23 @@
 # MLOps Cloud Demo
 
+## ⚡ Project Status: Evolved
+
+**March 2026 Update**: This project achieved its original goal — demonstrating 
+cost-efficient MLOps for startups at $12.34/month. 
+
+The infrastructure patterns, Airflow DAGs, FastAPI scaffold, Terraform modules, 
+and S3 architecture built here have been **recycled into a new project**: a PE 
+portfolio data optimization demo powering [ctrlshift.now](https://ctrlshift.now).
+
+This repo is now **archived as a reference implementation**. The wine quality 
+dataset was a placeholder — the real signal was always the infrastructure story: 
+systematic cost optimization, evidence-based decisions, production-grade MLOps 
+on a startup budget.
+
+**See the successor project**: [diagnostic-web-app](https://github.com/dataappengineer/diagnostic-web-app)
+
+---
+
 > **Portfolio Project**: End-to-end MLOps pipeline showcasing data engineering, ML model training, cloud deployment, and infrastructure as code best practices.
 
 **🚀 Live Deployment**: ML API running on AWS ECS Fargate  
